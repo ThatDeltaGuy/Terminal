@@ -1,0 +1,32 @@
+<!-- Install the font "Glass TTY VT220" for the best experience! --->
+<!-- http://blog.fosketts.net/2015/10/06/the-best-mac-os-x-terminal-font-glass-tty-vt220/ --->
+
+<head>
+	<title>Terminal</title>
+	<link type="text/css" rel="stylesheet" href="css/main.css" />
+	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+</head>
+
+<body class="crt">
+	<table id="terminal">
+		<tr id="commandline">
+			<td id="input"><span>LOGON: </span><input type="text" class="commandline" /></td>
+		</tr>
+	</table>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+	
+	<script src="js/main.js"></script>
+	<script type="text/javascript">
+		//always keep .commandline in focus
+		$(document).ready(function() {
+			$('.commandline').focus();
+			/* $('.commandline').focusout(function() {
+				$('.commandline').focus();
+			}); */
+		});
+        $(document).keydown(function() {
+            $('.commandline').focus();
+        })
+	</script>
+</body>
