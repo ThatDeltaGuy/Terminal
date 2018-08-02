@@ -2,46 +2,40 @@ var textColor = "white";
 var runningAProgram = false;
 var database = ['helloworld.txt', 'Hello world!'];
 var loggedin=false;
+var wargames=false;
 var runningProgram;
-var posting=false;
+var separatedWords = [];
 
-//virtual console.log()
+var postCommand = function(postText) {
+	
+	$("#commandline").before('<tr class="posted command"><td style="color: ' + textColor + ';">'+postText+'</td></tr>');  
+	window.scrollTo(0, document.body.scrollHeight);
+	$('input[class=commandline]').removeAttr('disabled');
+	console.log("---------------------------");	
+};
+
 var post = function(postText) {
-	var postWaiting="";
-	if(!posting){
-		console.log(posting);
-		posting = true;
 		console.log("Posting '" + postText + "'");
+		$("#commandline").before('<tr class="posted response"><td style="color: ' + textColor + ';"></td></tr>');
 
-		$("#commandline").before('<tr class="posted"><td style="color: ' + textColor + ';"></td></tr>');
-
-		
 		var i = 0;                     
 		function inputLoop () {          
 			setTimeout(function () { 
-				$(".posted td").last().append(postText.charAt(i));       
+				$(".posted td").last().append(postText.charAt(i).toUpperCase());       
 				i++;                     
 				if (i < postText.length) {          
 					inputLoop();             
+				}
+				else{
+					$('input[class=commandline]').removeAttr('disabled');
 				}     
 				console.log(postText.length)                   
 			}, 100)
 		}
 
 		inputLoop();    
-		posting = false;
 		window.scrollTo(0, document.body.scrollHeight);
-		console.log("---------------------------");
-	}
-	else{
-		postWaiting = postText;
-		var postTimout = setTimeout(function(){ post(postWaiting); }, 100);
-		do{
-			clearTimeout(postTimout);
-			postTimout = setTimeout(function(){ post(postWaiting); }, 100);
-		}
-		while(posting)
-	}
+		console.log("---------------------------");	
 };
 
 var dictionary = [
@@ -51,8 +45,8 @@ var dictionary = [
     //"muffin", "Meow Meow Meow Meow Meow Meow Meow Meow Meow Meow",
     "cat", "displays the contents of a file (syntax: 'cat [filename])",
     "dir", "displays the files contained in the database",
-    "write", "writes a file with the specified contents (syntax: 'write [filename] [contents]')",
-    "del", "erases a file from the database (syntax: 'del [filename]')",
+    //"write", "writes a file with the specified contents (syntax: 'write [filename] [contents]')",
+    //"del", "erases a file from the database (syntax: 'del [filename]')",
     "run", "interprets a stored file as javascript code (syntax: 'run [filename]')",
 ];
 
@@ -77,47 +71,6 @@ var xContainsY = function(list, term) { //returns the position of Y in X, or fal
 	}
 };
 
-//wordsep function
-var separatedWords = [];
-var wordsep = function(input) {
-	separatedWords = [];
-	/* console.log("WORDSEP input: " + input); */
-	//separate the input into words
-	var separate = function(chars) {
-		//separate the characters
-		var parsedInput = [];
-		for (i = 0; i < input.length; i++) {
-			parsedInput[i] = input[i];
-		}
-		/* console.log("Parsed input: " + parsedInput); */
-		//reconsolidate them into words
-		var word = "";
-		var analyzer = "";
-		var counter = 0;
-		for (i = 0; i <= chars.length; i++) {
-			analyzer = chars[i];
-			if (i > (chars.length - 1)) {
-				/* console.log("Hit the end!") */
-				separatedWords[counter] = word;
-				counter++;
-				word = "";
-			} else if (analyzer != " ") {
-				word += analyzer;
-				/* console.log("Word: " + word);
-				console.log("Analyzer: " + analyzer); */
-			} else {
-				/* console.log("Hit a space!"); */
-				separatedWords[counter] = word;
-				counter++;
-				word = "";
-			}
-		}
-	};
-	separate(input);
-	console.log("Separated words: '" + separatedWords + "'");
-	return (separatedWords);
-};
-
 //read file from database and return contents
 var readFromFile = function(fileName) {
     var fileContents = "";
@@ -132,15 +85,21 @@ var readFromFile = function(fileName) {
 
 var executeLogon = function(command) {
 	console.log("Attempting to execute command: " + command);
-	var argument = separatedWords[1];
+	// var argument = separatedWords[1];
 	var hello="";
+	command = command.toLowerCase();
 	switch (command) {
 		case "joshua":
-				hello="hello";
+				hello="Greetings Professor Falcon.";
 				loggedin=true;
+				wargames=true;
 			break;
+		case "alex":
+			hello="Greetings Alex.";
+			loggedin=true;
+		break;
 		default:
-			post("User not recognized.");
+			post("User not recognised.");
 		break;
 	}
 	if(loggedin){
@@ -154,7 +113,7 @@ var executeLogon = function(command) {
 //runs the specified command or returns an error
 var executeCommand = function(command) {
 	console.log("Attempting to execute command: " + command);
-    var argument = separatedWords[1];
+    // var argument = separatedWords[1];
 	switch (command) {
 		case "clear":
 			$(".posted").remove();
@@ -196,7 +155,7 @@ var executeCommand = function(command) {
 					post(dictionary[matchNumber] + ": " + dictionary[matchNumber + 1]);
 				} else {
 					console.log("Found no match.");
-					post("Command '" + argument + "' not recognized.");
+					post("Command '" + argument + "' not recognised.");
 				}
 			}
 			break;
@@ -279,7 +238,14 @@ var executeCommand = function(command) {
                 post("Editing '" + argument + "'...");
                 setTimeout(function() {$('input[class=commandline]').val(xContainsY(database, argument) + 1)}, 0100);
             } else { post("File '" + argument + "' not found."); }
-            break; */
+			break; */
+		case "exit":
+			$("#commandline span").html("LOGON: ");
+			$(".posted").remove();
+			$('input[class=commandline]').removeAttr('disabled');
+			console.clear();
+			loggedin=false;
+			break;
 		default:
 			post("Command '" + command + "' not recognized.");
 			break;
@@ -293,20 +259,30 @@ $(document).keyup(function(event) {
     if (event.keyCode == 13) {
 		var command = $('input[class=commandline]').val();
 		// console.log("Command length: " + command.length);
+		$('input[class=commandline]').attr('disabled','disabled');
 		if(loggedin === false&&command.length > 0){
-			executeLogon(wordsep(command)[0]);
+			executeLogon(command.split(' ')[0]);
 			$('input[class=commandline]').val("");
 		}
-		else if (command.length > 0) {
-			console.log("'" + command + "' is length " + command.length + ".");
-			post(">" + command);
+		else if(loggedin&&wargames){
+			postCommand(command);
 			$('input[class=commandline]').val("");
 			alertKeyPressed = true;
             if (runningAProgram === false) {
-				setTimeout(function(){executeCommand(wordsep(command)[0])},100); 
+				setTimeout(function(){joshua(command.split(' ')[0])},100); 
+			}
+		}
+		else if (command.length > 0) {
+			console.log("'" + command + "' is length " + command.length + ".");
+			postCommand(command);
+			$('input[class=commandline]').val("");
+			alertKeyPressed = true;
+            if (runningAProgram === false) {
+				setTimeout(function(){executeCommand(command.split(' ')[0])},100); 
 			}
 		} else {
 			console.log("'" + command + "is length 0, not posting.");
+			$('input[class=commandline]').removeAttr('disabled');
 		}
 	}
 });
@@ -382,3 +358,23 @@ $(document).keypress("c",function(e) {
 };
 
 RPS(); */
+
+var joshua = function(command) {
+	console.log("Attempting to execute command: " + command);
+    // var argument = separatedWords[1];
+	switch (command) {
+		case "hello":
+			post("how are you feeling today?");
+			break;
+		case "exit":
+			$("#commandline span").html("LOGON: ");
+			$(".posted").remove();
+			$('input[class=commandline]').removeAttr('disabled');
+			console.clear();
+			loggedin=false;
+			break;
+		default:
+			post("Command '" + command + "' not recognised.");
+			break;
+	}
+}

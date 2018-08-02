@@ -47,3 +47,7 @@ td {
 	font-weight: bold;
 	outline: none;
 }
+
+.command td{
+    padding-bottom:30px;
+}
