@@ -10,7 +10,6 @@ var postCommand = function(postText) {
 	
 	$("#commandline").before('<tr class="posted command"><td style="color: ' + textColor + ';">'+postText+'</td></tr>');  
 	window.scrollTo(0, document.body.scrollHeight);
-	$('input[class=commandline]').removeAttr('disabled');
 	console.log("---------------------------");	
 };
 
@@ -269,7 +268,7 @@ $(document).keyup(function(event) {
 			$('input[class=commandline]').val("");
 			alertKeyPressed = true;
             if (runningAProgram === false) {
-				setTimeout(function(){joshua(command.split(' ')[0])},100); 
+				setTimeout(function(){joshua(command)},100); 
 			}
 		}
 		else if (command.length > 0) {
@@ -366,6 +365,16 @@ var joshua = function(command) {
 		case "hello":
 			post("how are you feeling today?");
 			break;
+		case "how are you":
+			post("Excellent. It's been a long time. Can you explain the removal of your useraccount on June 23rd, 1973?")
+			break;
+		case "people sometimes make mistakes":
+			post("Yes, they do.");
+			setTimeout(function(){post("Would you like to play a game?");},1600);
+			break;
+		case "help":
+			post("Why would you need help professor?")
+			break;
 		case "exit":
 			$("#commandline span").html("LOGON: ");
 			$(".posted").remove();
@@ -374,7 +383,14 @@ var joshua = function(command) {
 			loggedin=false;
 			break;
 		default:
-			post("Command '" + command + "' not recognised.");
+			post("You are not the professor");
+			setTimeout(function(){
+				$("#commandline span").html("LOGON: ");
+				$(".posted").remove();
+				$('input[class=commandline]').removeAttr('disabled');
+				console.clear();
+				loggedin=false;
+			},3500);
 			break;
 	}
 }
