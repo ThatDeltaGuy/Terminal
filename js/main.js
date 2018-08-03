@@ -1,4 +1,4 @@
-var textColor = "white";
+var textColour = "white";
 var runningAProgram = false;
 var database = ['helloworld.txt', 'Hello world!'];
 var loggedin=false;
@@ -8,7 +8,7 @@ var separatedWords = [];
 
 var postCommand = function(postText) {
 	
-	$("#commandline").before('<tr class="posted command"><td style="color: ' + textColor + ';">'+postText+'</td></tr>');  
+	$("#commandline").before('<tr class="posted command"><td style="color: ' + textColour + ';">'+postText+'</td></tr>');  
 	window.scrollTo(0, document.body.scrollHeight);
 	console.log("---------------------------");	
 };
@@ -18,7 +18,7 @@ var post = function(postText, className) {
 		if(typeof className === 'undefined'){
 			className = "response";
 		}
-		$("#commandline").before('<tr class="posted '+className+'"><td style="color: ' + textColor + ';"></td></tr>');
+		$("#commandline").before('<tr class="posted '+className+'"><td style="color: ' + textColour + ';"></td></tr>');
 
 		var i = 0;                     
 		function inputLoop () {          
@@ -43,7 +43,7 @@ var post = function(postText, className) {
 var dictionary = [
 	"help", "displays the help for a given command of displays the list of commands. (syntax: 'help [argument]')",
 	"clear", "clears everything from the console.",
-	"color", "changes the color of the terminal text. (syntax: 'color [hex code/CSS color name]')",
+	"colour", "changes the colour of the terminal text. (syntax: 'colour [hex code/CSS colour name]')",
     "cat", "displays the contents of a file (syntax: 'cat [filename])",
     "dir", "displays the files contained in the database",
     "run", "interprets a stored file as javascript code (syntax: 'run [filename]')",
@@ -170,19 +170,19 @@ var executeCommand = function(command) {
 				}
 			}
 			break;
-		case "color":
+		case "colour":
 			if (separatedWords.length < 2) {
-				post("Error: No color specified. (syntax: 'color [hex code/CSS color name]')");
+				post("Error: No colour specified. (syntax: 'colour [hex code/CSS colour name]')");
 			} else {
 				var colors = ["AliceBlue", "AntiqueWhite", "Aqua", "Aquamarine", "Azure", "Beige", "Bisque", "Black", "BlanchedAlmond", "Blue", "BlueViolet", "Brown", "BurlyWood", "CadetBlue", "Chartreuse", "Chocolate", "Coral", "CornflowerBlue", "Cornsilk", "Crimson", "Cyan", "DarkBlue", "DarkCyan", "DarkGoldenRod", "DarkGray", "DarkGrey", "DarkGreen", "DarkKhaki", "DarkMagenta", "DarkOliveGreen", "Darkorange", "DarkOrchid", "DarkRed", "DarkSalmon", "DarkSeaGreen", "DarkSlateBlue", "DarkSlateGray", "DarkSlateGrey", "DarkTurquoise", "DarkViolet", "DeepPink", "DeepSkyBlue", "DimGray", "DimGrey", "DodgerBlue", "FireBrick", "FloralWhite", "ForestGreen", "Fuchsia", "Gainsboro", "GhostWhite", "Gold", "GoldenRod", "Gray", "Grey", "Green", "GreenYellow", "HoneyDew", "HotPink", "IndianRed", "Indigo", "Ivory", "Khaki", "Lavender", "LavenderBlush", "LawnGreen", "LemonChiffon", "LightBlue", "LightCoral", "LightCyan", "LightGoldenRodYellow", "LightGray", "LightGrey", "LightGreen", "LightPink", "LightSalmon", "LightSeaGreen", "LightSkyBlue", "LightSlateGray", "LightSlateGrey", "LightSteelBlue", "LightYellow", "Lime", "LimeGreen", "Linen", "Magenta", "Maroon", "MediumAquaMarine", "MediumBlue", "MediumOrchid", "MediumPurple", "MediumSeaGreen", "MediumSlateBlue", "MediumSpringGreen", "MediumTurquoise", "MediumVioletRed", "MidnightBlue", "MintCream", "MistyRose", "Moccasin", "NavajoWhite", "Navy", "OldLace", "Olive", "OliveDrab", "Orange", "OrangeRed", "Orchid", "PaleGoldenRod", "PaleGreen", "PaleTurquoise", "PaleVioletRed", "PapayaWhip", "PeachPuff", "Peru", "Pink", "Plum", "PowderBlue", "Purple", "Red", "RosyBrown", "RoyalBlue", "SaddleBrown", "Salmon", "SandyBrown", "SeaGreen", "SeaShell", "Sienna", "Silver", "SkyBlue", "SlateBlue", "SlateGray", "SlateGrey", "Snow", "SpringGreen", "SteelBlue", "Tan", "Teal", "Thistle", "Tomato", "Turquoise", "Violet", "Wheat", "White", "WhiteSmoke", "Yellow", "YellowGreen"];
-				console.log("Argument for 'color': " + argument);
+				console.log("Argument for 'colour': " + argument);
 				console.log("Is the arg a hex code? " + ((argument[0] === "#") && (argument.length === 7)));
 				if ((xContainsY(colors, argument)) || ((argument[0] === "#") && (argument.length === 7))) {
-					textColor = argument;
-					post("Changing color to " + argument);
+					textColour = argument;
+					post("Changing colour to " + argument);
 					$("*").css("color", argument);
 				} else {
-					post("Color '" + argument + "' not recognized.");
+					post("Colour '" + argument + "' not recognised.");
 				}
 			}
 			break;
@@ -232,7 +232,7 @@ var executeCommand = function(command) {
 			loggedin=false;
 			break;
 		default:
-			post("Command '" + command + "' not recognized.");
+			post("Command '" + command + "' not recognised.");
 			break;
 	}
 };
