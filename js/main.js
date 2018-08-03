@@ -13,9 +13,12 @@ var postCommand = function(postText) {
 	console.log("---------------------------");	
 };
 
-var post = function(postText) {
-		console.log("Posting '" + postText + "'");
-		$("#commandline").before('<tr class="posted response"><td style="color: ' + textColor + ';"></td></tr>');
+var post = function(postText, className) {
+		console.log("Posting '" + postText + "'" + className);
+		if(typeof className === 'undefined'){
+			className = "response";
+		}
+		$("#commandline").before('<tr class="posted '+className+'"><td style="color: ' + textColor + ';"></td></tr>');
 
 		var i = 0;                     
 		function inputLoop () {          
@@ -41,11 +44,8 @@ var dictionary = [
 	"help", "displays the help for a given command of displays the list of commands. (syntax: 'help [argument]')",
 	"clear", "clears everything from the console.",
 	"color", "changes the color of the terminal text. (syntax: 'color [hex code/CSS color name]')",
-    //"muffin", "Meow Meow Meow Meow Meow Meow Meow Meow Meow Meow",
     "cat", "displays the contents of a file (syntax: 'cat [filename])",
     "dir", "displays the files contained in the database",
-    //"write", "writes a file with the specified contents (syntax: 'write [filename] [contents]')",
-    //"del", "erases a file from the database (syntax: 'del [filename]')",
     "run", "interprets a stored file as javascript code (syntax: 'run [filename]')",
 ];
 
@@ -72,14 +72,21 @@ var xContainsY = function(list, term) { //returns the position of Y in X, or fal
 
 //read file from database and return contents
 var readFromFile = function(fileName) {
-    var fileContents = "";
-	var fileExists = (xContainsY(database, fileName));
-    if (fileExists === false) {
-        return("File '" + separatedWords[1] + "' not found.");
-    } else {
-        fileContents = (database[fileExists + 1]);
-        return(fileContents);
-    }
+    // var fileContents = "";
+	// var fileExists = (xContainsY(database, fileName));
+    // if (fileExists === false) {
+    //     return("File '" + separatedWords[1] + "' not found.");
+    // } else {
+    //     fileContents = (database[fileExists + 1]);
+    //     return(fileContents);
+	// }
+	var url = "documents/"+fileName;
+	$.ajax({
+		url: url,
+		context: document.body
+	  }).done(function() {
+		$( this ).addClass( "done" );
+	  });
 };
 
 var executeLogon = function(command) {
@@ -97,12 +104,17 @@ var executeLogon = function(command) {
 			hello="Greetings Alex.";
 			loggedin=true;
 		break;
+		case "guest":
+			hello="Greetings.";
+			loggedin=true;
+		break;
 		default:
 			post("User not recognised.");
 		break;
 	}
 	if(loggedin){
 		$("#commandline span").html("");
+		$(".postit").css('display','none');
 		$(".posted").remove();
 		console.clear();
 		post(hello);
@@ -175,69 +187,43 @@ var executeCommand = function(command) {
 			}
 			break;
         case "dir":
-            if (database.length < 1) {
-                post("The database is empty.");
-                break;
-            }
-            var fileList = database[0];
-            for (var i=1;i<database.length;i++) {
-                if (i % 2 === 0) {
-                    fileList += ", " + database[i];
-                }
-            }
-            post(fileList);
+            // if (database.length < 1) {
+            //     post("The database is empty.");
+            //     break;
+            // }
+            // var fileList = database[0];
+            // for (var i=1;i<database.length;i++) {
+            //     if (i % 2 === 0) {
+            //         fileList += ", " + database[i];
+            //     }
+			// }
+			var filesDirectory = '/documents/';
+			var fileList="";
+			
+			$.ajax({url: filesDirectory}).then(function(html) {
+				// create temporary DOM element
+				var document = $(html);
+
+				// find all links ending with .pdf 
+				document.find('a[href$=".txt"]').each(function() {
+					var fileName = $(this).text();
+					var fileUrl = $(this).attr('href');
+					console.log(fileName+"|"+fileUrl);
+					post(fileUrl,"list");
+				})
+				
+			});
+            
       		break;
         case "cat":
             console.log("Opening file " + argument + "...");
             post(readFromFile(argument));
             //post(argument.fileContents); //failed attempt to use objects
             break;
-        case "write":
-            var fileName = argument;
-            var fileContents = "";
-            if (separatedWords.length < 2) {
-                post("Error: File name not specified.");
-                break;
-            } else if (separatedWords.length < 3) {
-                post("Error: File contents is empty.");
-                break;
-            }
-            for (i=2;i<separatedWords.length;i++) {
-                fileContents += separatedWords[i] + " ";
-            }
-            post("File '" + fileName + "' created.");
-            database.push(fileName);
-            database.push(fileContents);
-            //this[fileName] = new Book(fileName, fileContents); //failed attempt to use objects
-            break;
         case "run":
             post("Executing program '" + argument + "'...");
             eval(readFromFile(argument));
             break;
-        case "del":
-            if (xContainsY(database, argument) === false) {
-                post("File '" + argument + "' not found.");
-                break;
-            }
-            var filePosition = xContainsY(database, argument);
-            /* post("File '" + argument + "' is at position " + filePosition);
-            fileContentsPosition = xContainsY(database, argument) + 1;
-            post("File contents are at position " + fileContentsPosition); */ //debugging
-            database.splice(filePosition, 2);
-            post("Deleted file '" + argument + "'.");
-            break;
-        /* case "random":
-            for (i = 0; i <= 10; i++) {
-                wordsep(write Math.random());
-                executeCommand(wordsep(command)[0])
-            }
-            break; */ //something I tried to write in the program using run but it didn't work
-        /* case "edit":
-            if (!isNaN(xContainsY(database, argument))) {
-                post("Editing '" + argument + "'...");
-                setTimeout(function() {$('input[class=commandline]').val(xContainsY(database, argument) + 1)}, 0100);
-            } else { post("File '" + argument + "' not found."); }
-			break; */
 		case "exit":
 			$("#commandline span").html("LOGON: ");
 			$(".posted").remove();
