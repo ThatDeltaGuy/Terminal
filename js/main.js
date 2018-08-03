@@ -9,7 +9,7 @@ var separatedWords = [];
 var postCommand = function(postText) {
 	
 	$("#commandline").before('<tr class="posted command"><td style="color: ' + textColour + ';">'+postText+'</td></tr>');  
-	window.scrollTo(0, document.body.scrollHeight);
+	$('main').scrollTop($(document).height());
 	console.log("---------------------------");	
 };
 
@@ -36,9 +36,10 @@ var post = function(postText, className) {
 		}
 
 		inputLoop();    
-		window.scrollTo(0, document.body.scrollHeight);
+		$('main').scrollTop($(document).height());
 		console.log("---------------------------");	
 };
+
 
 var dictionary = [
 	"help", "displays the help for a given command of displays the list of commands. (syntax: 'help [argument]')",
@@ -72,26 +73,77 @@ var xContainsY = function(list, term) { //returns the position of Y in X, or fal
 
 //read file from database and return contents
 var readFromFile = function(fileName) {
-    // var fileContents = "";
-	// var fileExists = (xContainsY(database, fileName));
-    // if (fileExists === false) {
-    //     return("File '" + separatedWords[1] + "' not found.");
-    // } else {
-    //     fileContents = (database[fileExists + 1]);
-    //     return(fileContents);
-	// }
-	var url = "documents/"+fileName;
+    $("#commandline").before('<tr class="posted file"><td style="color: ' + textColour + ';"></td></tr>');
+
+	var fileUrl = '/documents/' + fileName;
+	var file="";
+	console.log(fileUrl);
 	$.ajax({
-		url: url,
-		context: document.body
-	  }).done(function() {
-		$( this ).addClass( "done" );
+		url: fileUrl,
+		context: document.body,
+		statusCode: {
+			404: function() {
+			  alert( "page not found" );
+			}
+		  }
+	  }).done(function(data) {
+			file = data;
+			console.log(data);
+			inputLoop(); 
 	  });
+
+	var i = 0;   
+	var tag="";                  
+	function delayedInputLoop() {          
+		setTimeout(function () { 
+			$(".posted td").last().append(file.charAt(i).toUpperCase());       
+			i++;                     
+			if (i < file.length) {    
+				if(file.charAt(i)=="<") {
+					tag="";
+					inputLoop(); 
+				}     
+				else{
+					delayedInputLoop();
+				}             
+			}
+			else{
+				$('input[class=commandline]').removeAttr('disabled');
+			}     
+			console.log(file.length)                   
+		}, 100);
+	}
+	function inputLoop () {          
+		tag.append(file.charAt(i));
+		i++;                     
+		if (i < file.length) {   
+			if(file.charAt(i-1)==">") {
+				$(".posted td").last().append(tag);
+				delayedInputLoop(); 
+			}     
+			else{
+				inputLoop();
+			}             
+		}
+		else{
+			$('input[class=commandline]').removeAttr('disabled');
+		}     
+		console.log(file.length)                   
+	}
+
+	   
+	$('main').scrollTop($(document).height());
+	console.log("---------------------------");	
 };
+
+var commandContains = function (command, term) {
+	return command.includes(term);
+}
 
 var executeLogon = function(command) {
 	console.log("Attempting to execute command: " + command);
 	// var argument = separatedWords[1];
+
 	var hello="";
 	command = command.toLowerCase();
 	switch (command) {
@@ -124,13 +176,14 @@ var executeLogon = function(command) {
 //runs the specified command or returns an error
 var executeCommand = function(command) {
 	console.log("Attempting to execute command: " + command);
-    // var argument = separatedWords[1];
-	switch (command) {
-		case "clear":
+	// var argument = separatedWords[1];
+
+	switch (true) {
+		case commandContains(command, "clear"):
 			$(".posted").remove();
 			console.clear();
 			break;
-		case "help":
+		case commandContains(command, "help"):
 			console.log("separatedWords length: " + separatedWords.length);
 			if (separatedWords.length <= 1) {
 				console.log("Found no arguments for: help");
@@ -170,7 +223,7 @@ var executeCommand = function(command) {
 				}
 			}
 			break;
-		case "colour":
+		case commandContains(command, "colour"):
 			if (separatedWords.length < 2) {
 				post("Error: No colour specified. (syntax: 'colour [hex code/CSS colour name]')");
 			} else {
@@ -186,17 +239,7 @@ var executeCommand = function(command) {
 				}
 			}
 			break;
-        case "dir":
-            // if (database.length < 1) {
-            //     post("The database is empty.");
-            //     break;
-            // }
-            // var fileList = database[0];
-            // for (var i=1;i<database.length;i++) {
-            //     if (i % 2 === 0) {
-            //         fileList += ", " + database[i];
-            //     }
-			// }
+        case commandContains(command, "dir"):
 			var filesDirectory = '/documents/';
 			var fileList="";
 			
@@ -215,16 +258,16 @@ var executeCommand = function(command) {
 			});
             
       		break;
-        case "cat":
-            console.log("Opening file " + argument + "...");
-            post(readFromFile(argument));
-            //post(argument.fileContents); //failed attempt to use objects
+		case commandContains(command, "cat"):
+			command = command.substr(4);
+            console.log("Opening file " + command + "...");
+            readFromFile(command);
             break;
-        case "run":
+        case commandContains(command, "run"):
             post("Executing program '" + argument + "'...");
             eval(readFromFile(argument));
             break;
-		case "exit":
+		case commandContains(command, "exit"):
 			$("#commandline span").html("LOGON: ");
 			$(".posted").remove();
 			$('input[class=commandline]').removeAttr('disabled');
@@ -263,7 +306,7 @@ $(document).keyup(function(event) {
 			$('input[class=commandline]').val("");
 			alertKeyPressed = true;
             if (runningAProgram === false) {
-				setTimeout(function(){executeCommand(command.split(' ')[0])},100); 
+				setTimeout(function(){executeCommand(command)},100); 
 			}
 		} else {
 			console.log("'" + command + "is length 0, not posting.");
@@ -346,22 +389,23 @@ RPS(); */
 
 var joshua = function(command) {
 	console.log("Attempting to execute command: " + command);
-    // var argument = separatedWords[1];
-	switch (command) {
-		case "hello":
+	// var argument = separatedWords[1];
+	command = command.toLowerCase();
+	switch (true) {
+		case commandContains(command, "hello"):
 			post("how are you feeling today?");
 			break;
-		case "how are you":
+		case commandContains(command, "how are you"):
 			post("Excellent. It's been a long time. Can you explain the removal of your useraccount on June 23rd, 1973?")
 			break;
-		case "people sometimes make mistakes":
+		case commandContains(command, "people sometimes make mistakes"):
 			post("Yes, they do.");
-			setTimeout(function(){post("Would you like to play a game?");},1600);
+			setTimeout(function(){post("Would you like to play a game?");},1800);
 			break;
-		case "help":
+		case commandContains(command, "help"):
 			post("Why would you need help professor?")
 			break;
-		case "exit":
+		case commandContains(command, "exit"):
 			$("#commandline span").html("LOGON: ");
 			$(".posted").remove();
 			$('input[class=commandline]').removeAttr('disabled');
