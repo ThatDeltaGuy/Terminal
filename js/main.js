@@ -4,10 +4,11 @@ var database = ['helloworld.txt', 'Hello world!'];
 var loggedin=false;
 var wargames=false;
 var runningProgram;
+var commands = [];
 var separatedWords = [];
 
 var postCommand = function(postText) {
-	
+	commands.push(postText);
 	$("#commandline").before('<tr class="posted command"><td style="color: ' + textColour + ';">'+postText+'</td></tr>');  
 	$('main').scrollTop($(document).height());
 	console.log("---------------------------");	
@@ -47,7 +48,8 @@ var dictionary = [
 	"colour", "changes the colour of the terminal text. (syntax: 'colour [hex code/CSS colour name]')",
     "cat", "displays the contents of a file (syntax: 'cat [filename])",
     "dir", "displays the files contained in the database",
-    "run", "interprets a stored file as javascript code (syntax: 'run [filename]')",
+	"run", "interprets a stored file as javascript code (syntax: 'run [filename]')",
+	"exit", "Exits current session",
 ];
 
 var xContainsY = function(list, term) { //returns the position of Y in X, or false
@@ -113,8 +115,9 @@ var readFromFile = function(fileName) {
 			console.log(file.length)                   
 		}, 100);
 	}
+
 	function inputLoop () {          
-		tag.append(file.charAt(i));
+		tag += file.charAt(i);
 		i++;                     
 		if (i < file.length) {   
 			if(file.charAt(i-1)==">") {
@@ -181,6 +184,7 @@ var executeCommand = function(command) {
 	switch (true) {
 		case commandContains(command, "clear"):
 			$(".posted").remove();
+			$('input[class=commandline]').removeAttr('disabled');
 			console.clear();
 			break;
 		case commandContains(command, "help"):
@@ -272,6 +276,7 @@ var executeCommand = function(command) {
 			$(".posted").remove();
 			$('input[class=commandline]').removeAttr('disabled');
 			console.clear();
+			commands = [];
 			loggedin=false;
 			break;
 		default:
@@ -281,11 +286,12 @@ var executeCommand = function(command) {
 };
 
 var alertKeyPressed = false;
-
+var commandHistory=1;
 //command is checked on enter key press
 $(document).keyup(function(event) {
     if (event.keyCode == 13) {
 		var command = $('input[class=commandline]').val();
+		commandHistory=1;
 		// console.log("Command length: " + command.length);
 		$('input[class=commandline]').attr('disabled','disabled');
 		if(loggedin === false&&command.length > 0){
@@ -311,6 +317,19 @@ $(document).keyup(function(event) {
 		} else {
 			console.log("'" + command + "is length 0, not posting.");
 			$('input[class=commandline]').removeAttr('disabled');
+		}
+	}
+	else if(event.keyCode == 38&&commandHistory<=commands.length){ //up
+		$('input[class=commandline]').val(commands[commands.length-commandHistory]);
+		console.log("CL:"+commands.length+" CH:"+commandHistory+" Val:"+commands[commands.length-commandHistory]);
+		commandHistory++;
+	}
+	else if(event.keyCode == 40&&commandHistory>1){ //down
+		commandHistory--;
+		$('input[class=commandline]').val(commands[commands.length-commandHistory]);
+		console.log("CL:"+commands.length+" CH:"+commandHistory+" Val:"+commands[commands.length-commandHistory]);
+		if(commandHistory==1){
+			commandHistory++;
 		}
 	}
 });
@@ -410,6 +429,7 @@ var joshua = function(command) {
 			$(".posted").remove();
 			$('input[class=commandline]').removeAttr('disabled');
 			console.clear();
+			commands = [];
 			loggedin=false;
 			break;
 		default:
@@ -419,6 +439,7 @@ var joshua = function(command) {
 				$(".posted").remove();
 				$('input[class=commandline]').removeAttr('disabled');
 				console.clear();
+				commands = [];
 				loggedin=false;
 			},3500);
 			break;
